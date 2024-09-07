@@ -68,8 +68,13 @@ app.get("/artwork", function (req, res) {
 				if (writeformat == "jpeg") {
 					writeformat = "jpg";
 				}
-				fs.writeFile(id + "." + writeformat, Buffer.from(image.data), "binary", async function () {
-					var temppath = path.dirname(require.main.filename)
+				fs.writeFile(id + "." + writeformat, Buffer.from(image.data), "binary", async function (err) {
+					if (err) {
+						console.log('Error writing file:', err);
+						res.send(JSON.stringify({ "result": "file write error" }));
+						return;
+					}
+					console.log('File written successfully');
 					
 					console.log(temppath + "\\" + id + "." + writeformat)
 					var tempresp = await airtable(
@@ -126,19 +131,20 @@ async function airtable(fields, id, hasimage) {
 	return new Promise((resolve, reject) => {
 
 		// Handle resolve and reject in the asynchronous API
-		base('Tracks').create([
-			{
-				"fields": fields
+		base('Tracks').create([{ "fields": fields }], function (err, records) {
+			try {
+				if (err) {
+					console.log('Error with Airtable API:', err);
+					resolve({ "result": "not ok" });
+				} else {
+					console.log('Record created successfully:', JSON.stringify(records, null, 2));
+					resolve({ "result": "ok" });
+				}
+			} catch (error) {
+				console.error('Error in Airtable callback:', error);
+				resolve({ "result": "callback error" });
 			}
-		], function (err, records) {
-			if (err) {
-				console.log(fields["File Name"])
-				console.error(err);
-				resolve({ "result": "not ok" });
-			} else {
-				resolve({ "result": "ok" });
-			}
-		});
+		});		
 
 	})
 
