@@ -69,6 +69,7 @@ app.get("/artwork", function (req, res) {
 					writeformat = "jpg";
 				}
 				fs.writeFile(id + "." + writeformat, Buffer.from(image.data), "binary", async function (err) {
+					var temppath = path.dirname(require.main.filename)
 					if (err) {
 						console.log('Error writing file:', err);
 						res.send(JSON.stringify({ "result": "file write error" }));
