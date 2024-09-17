@@ -81,7 +81,7 @@ app.get("/artwork", function (req, res) {
                 "Artists (Metadata)": artist,
                 "Album (Metadata)": album,
                 "Track Name (Metadata)": title,
-                "Source": { "name": source } // Add source to Airtable fields
+                "Source": source
             };
 
             if (image != null) {
