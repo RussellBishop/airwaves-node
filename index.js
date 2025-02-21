@@ -43,13 +43,13 @@ app.get("/artwork", function (req, res) {
     // Set the correct URL based on the "source" argument
     if (source === "new") {
         readUrl = "https://docs.google.com/uc?export=download&id=" + id;
-    } else if (source === "dnbportal") {
+    } else if (source.includes("dnbportal")) {
         readUrl = "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media&key=AIzaSyDJKpf0XCMy9B09JGzFelyhtovmjJhG-w4";
     } else {
         res.send(JSON.stringify({ "result": "unknown source" }));
         return;
     }
-
+    
     // Use jsmediatags with the dynamically set URL
     jsmediatags.read(readUrl, {
         onSuccess: async function (tag) {
