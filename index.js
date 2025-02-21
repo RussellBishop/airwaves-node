@@ -39,14 +39,17 @@ app.get("/artwork", function (req, res) {
     var file = req.query.file;
     var source = req.query.source;  // New argument "source"
     var readUrl;
+    var sourceInTracksTable;
 
     // Set the correct URL based on the "source" argument
     if (source === "new") {
         readUrl = "https://docs.google.com/uc?export=download&id=" + id;
+        sourceInTracksTable = "new";
     } else if (source.includes("dnbportal")) {
         readUrl = "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media&key=AIzaSyDJKpf0XCMy9B09JGzFelyhtovmjJhG-w4";
+        sourceInTracksTable = "dnbportal";
     } else {
-        res.send(JSON.stringify({ "result": "unknown source" }));
+        res.send(JSON.stringify({ "result": "Unknown sync source in Google Drive table (needs to be New or DNBPortal …)"}));
         return;
     }
     
@@ -81,7 +84,7 @@ app.get("/artwork", function (req, res) {
                 "Artists (Metadata)": artist,
                 "Album (Metadata)": album,
                 "Track Name (Metadata)": title,
-                "Source": source
+                "Source": sourceInTracksTable
             };
 
             if (image != null) {
