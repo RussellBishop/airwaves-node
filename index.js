@@ -5,7 +5,7 @@ const express = require("express");
 var Airtable = require('airtable');
 Airtable.configure({
     endpointUrl: 'https://api.airtable.com',
-    apiKey: process.env.AIRTABLE_API_KEY
+    apiKey: 'patQhZ7gCeTq6aAVL.1d6f4d06848b63b2712bc9106df93355fabc39f4da57984e6b4fe885b6f0af19'
 });
 var base = Airtable.base('app6GHxtqv6bp7oBk');
 
