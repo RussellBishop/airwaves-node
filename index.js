@@ -61,32 +61,25 @@ app.get("/artwork", function (req, res) {
     jsmediatags.read(readUrl, {
         onSuccess: async function (tag) {
             var image = null;
-            // Tags
             if ((tag.tags).hasOwnProperty("picture")) {
                 console.log('has picture');
                 image = tag.tags.picture;
             }
-            // Artist
             var artist = null;
             if ((tag.tags).hasOwnProperty("artist")) {
                 console.log('has artist');
                 artist = tag.tags.artist;
             }
-            // Album
             var album = null;
             if ((tag.tags).hasOwnProperty("album")) {
                 console.log('has album');
                 album = tag.tags.album;
             }
-            // Title
             var title = null;
             if ((tag.tags).hasOwnProperty("title")) {
                 console.log('has title');
                 title = tag.tags.title;
             }
-            // Track number (often "3" or "3/12")
-            var trackRaw = null;
-            if ((tag.tags).hasOwnProperty("track")) trackRaw = tag.tags.track;
 
             // Prepare Airtable fields
             let airtableFields = {
@@ -95,12 +88,9 @@ app.get("/artwork", function (req, res) {
                 "Artists (Metadata)": artist,
                 "Album (Metadata)": album,
                 "Track Name (Metadata)": title,
-                "Track Number (Metadata)": trackNumber, // number field
-                "Track Number String (Metadata)": trackRaw, // text field (keeps "3/12")
                 "Source": sourceInTracksTable
             };
 
-            // Image
             if (image != null) {
                 console.log('has image');
                 var writeformat = ((image.format).split("/"))[1];
