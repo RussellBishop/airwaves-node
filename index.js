@@ -5,7 +5,7 @@ const express = require("express");
 var Airtable = require('airtable');
 Airtable.configure({
     endpointUrl: 'https://api.airtable.com',
-    apiKey: 'patQhZ7gCeTq6aAVL.1d6f4d06848b63b2712bc9106df93355fabc39f4da57984e6b4fe885b6f0af19'
+    apiKey: process.env.AIRTABLE_API_KEY
 });
 var base = Airtable.base('app6GHxtqv6bp7oBk');
 
@@ -46,7 +46,11 @@ app.get("/artwork", function (req, res) {
         readUrl = "https://docs.google.com/uc?export=download&id=" + id;
         sourceInTracksTable = "new";
     } else if (source.includes("dnbportal")) {
-        readUrl = "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media&key=AIzaSyDJKpf0XCMy9B09JGzFelyhtovmjJhG-w4";
+        readUrl =
+            "https://www.googleapis.com/drive/v3/files/" +
+            id +
+            "?alt=media&key=" +
+            process.env.GOOGLE_DRIVE_API_KEY;
         sourceInTracksTable = "dnbportal";
     } else {
         res.send(JSON.stringify({ "result": "Unknown sync source in Google Drive table (needs to be New or DNBPortal …)"}));
@@ -57,25 +61,32 @@ app.get("/artwork", function (req, res) {
     jsmediatags.read(readUrl, {
         onSuccess: async function (tag) {
             var image = null;
+            // Tags
             if ((tag.tags).hasOwnProperty("picture")) {
                 console.log('has picture');
                 image = tag.tags.picture;
             }
+            // Artist
             var artist = null;
             if ((tag.tags).hasOwnProperty("artist")) {
                 console.log('has artist');
                 artist = tag.tags.artist;
             }
+            // Album
             var album = null;
             if ((tag.tags).hasOwnProperty("album")) {
                 console.log('has album');
                 album = tag.tags.album;
             }
+            // Title
             var title = null;
             if ((tag.tags).hasOwnProperty("title")) {
                 console.log('has title');
                 title = tag.tags.title;
             }
+            // Track number (often "3" or "3/12")
+            var trackRaw = null;
+            if ((tag.tags).hasOwnProperty("track")) trackRaw = tag.tags.track;
 
             // Prepare Airtable fields
             let airtableFields = {
@@ -84,9 +95,12 @@ app.get("/artwork", function (req, res) {
                 "Artists (Metadata)": artist,
                 "Album (Metadata)": album,
                 "Track Name (Metadata)": title,
+                "Track Number (Metadata)": trackNumber, // number field
+                "Track Number String (Metadata)": trackRaw, // text field (keeps "3/12")
                 "Source": sourceInTracksTable
             };
 
+            // Image
             if (image != null) {
                 console.log('has image');
                 var writeformat = ((image.format).split("/"))[1];
