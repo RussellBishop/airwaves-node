@@ -88,6 +88,12 @@ app.get("/artwork", function (req, res) {
             var trackRaw = null;
             if ((tag.tags).hasOwnProperty("track")) trackRaw = tag.tags.track;
 
+            var trackNumber = null;
+            if (trackRaw != null) {
+                const m = String(trackRaw).match(/^(\d+)/);
+                trackNumber = m ? parseInt(m[1], 10) : null;
+            }
+
             // Prepare Airtable fields
             let airtableFields = {
                 "File ID (Google Drive)": id,
