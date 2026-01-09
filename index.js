@@ -84,14 +84,28 @@ app.get("/artwork", function (req, res) {
                 console.log('has title');
                 title = tag.tags.title;
             }
-            // Track number (often "3" or "3/12")
-            var trackRaw = null;
-            if ((tag.tags).hasOwnProperty("track")) trackRaw = tag.tags.track;
+            // Track number (often "3" or "3/12", sometimes an object like { no: 3, of: 12 })
+            const trackRaw = tag.tags.hasOwnProperty("track") ? tag.tags.track : null;
 
-            var trackNumber = null;
+            console.log("trackRaw:", trackRaw, "typeof:", typeof trackRaw);
+
+            let trackString = null;
+            let trackNumber = null;
+
             if (trackRaw != null) {
-                const m = String(trackRaw).match(/^(\d+)/);
-                trackNumber = m ? parseInt(m[1], 10) : null;
+                if (typeof trackRaw === "object") {
+                    const no = trackRaw.no ?? trackRaw.number ?? null;
+                    const of = trackRaw.of ?? trackRaw.total ?? null;
+
+                    if (no != null) {
+                        trackNumber = Number(no);
+                        trackString = of != null ? `${no}/${of}` : `${no}`;
+                    }
+                } else {
+                    trackString = String(trackRaw).trim();
+                    const m = trackString.match(/^(\d+)/);
+                    trackNumber = m ? parseInt(m[1], 10) : null;
+                }
             }
 
             // Prepare Airtable fields
@@ -101,10 +115,11 @@ app.get("/artwork", function (req, res) {
                 "Artists (Metadata)": artist,
                 "Album (Metadata)": album,
                 "Track Name (Metadata)": title,
-                "Track Number (Metadata)": trackNumber, // number field
-                "Track Number String (Metadata)": trackRaw, // text field (keeps "3/12")
                 "Source": sourceInTracksTable
             };
+
+            if (trackNumber != null) airtableFields["Track Number (Metadata)"] = trackNumber;
+            if (trackString) airtableFields["Track Number String (Metadata)"] = trackString;
 
             // Image
             if (image != null) {
